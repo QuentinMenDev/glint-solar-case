@@ -52,8 +52,6 @@ def get_location_data():
     lng = round(longitude_modulo(lng), 1)
     lat = round(lat, 1)
 
-    print(f"Longitude: {lng}, Latitude: {lat}, Date: {date}")
-
     with xr.open_dataset("data/waves_2019-01-01.nc", engine="netcdf4") as ds:
         """
         table format:
@@ -62,13 +60,19 @@ def get_location_data():
             latitude   float32          70.0 69.5 69.0 68.5 ... -59.0 -59.5 -60.0
             time       datetime64[ns]   2019-01-01 ... 2019-01-01T23:00:00
         Data variables:
-            hmax       float64 --> wave height
-            mwd        float64 --> mean wave direction
-            mwp        float64 --> mean wave period
-            tmax       float64 --> peak wave period
-            swh        float64 --> significant wave height
+            hmax       float64 --> wave height (m)
+            mwd        float64 --> mean wave direction (True degrees)
+            mwp        float64 --> mean wave period (s)
+            tmax       float64 --> peak wave period (s)
+            swh        float64 --> significant wave height (m)
         """
         wave_height = ds.sel(longitude=lng, latitude=lat, time=date, method="nearest")
+
+        print(wave_height["hmax"])
+        print(wave_height["mwd"])
+        print(wave_height["mwp"])
+        print(wave_height["tmax"])
+        print(wave_height["swh"])
 
     if np.isnan(wave_height["hmax"].values):
         return (
@@ -79,6 +83,7 @@ def get_location_data():
     return jsonify(
         {
             "location": {"lng": lng, "lat": lat},
+            "date": date.astype(str),
             "hmax": wave_height["hmax"].values.tolist(),
             "mwd": wave_height["mwd"].values.tolist(),
             "mwp": wave_height["mwp"].values.tolist(),
