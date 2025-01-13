@@ -1,0 +1,48 @@
+{
+	"folders": [
+		{
+			"path": ".",
+			"name": "root"
+		},
+		{
+			"path": "backend"
+		},
+		{
+			"path": "frontend"
+		}
+	],
+	"settings": {
+		"typescript.tsdk": "node_modules/typescript/lib",
+		"files.associations": {
+			"*.xml": "html",
+			"*.svg": "html"
+		},
+
+		"editor.formatOnSave": true,
+		"editor.defaultFormatter": "biomejs.biome",
+		"[javascript]": {
+			"editor.defaultFormatter": "biomejs.biome"
+		},
+		"[typescript]": {
+			"editor.defaultFormatter": "biomejs.biome"
+		},
+		"[typescriptreact]": {
+			"editor.defaultFormatter": "biomejs.biome"
+		},
+		"editor.codeActionsOnSave": {
+			"quickfix.biome": "explicit",
+			"source.organizeImports.biome": "explicit"
+		},
+		"javascript.format.semicolons": "remove",
+		"typescript.format.semicolons": "remove",
+		"autoimport.useSemiColon": false,
+		"typescript.format.insertSpaceAfterSemicolonInForStatements": false,
+		"javascript.format.insertSpaceAfterSemicolonInForStatements": false,
+		"[html]": {
+			"editor.defaultFormatter": "vscode.html-language-features"
+		},
+		"[python]": {
+			"editor.defaultFormatter": "ms-python.black-formatter"
+		}
+	}
+}

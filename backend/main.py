@@ -10,11 +10,13 @@ def longitude_modulo(value):
         new_longitude = 179.5
     return new_longitude
 
-@app.route('/')
-def index():
-    return 'Hello World!'
 
-@app.route('/get_location_data', methods=['POST'])
+@app.route("/")
+def index():
+    return "Hello World!"
+
+
+@app.route("/get_location_data", methods=["POST"])
 def get_location_data():
     request_data = request.json
 
@@ -24,29 +26,34 @@ def get_location_data():
 
     if lat == "" or lng == "":
         return (
-            jsonify({ "message": "Please provide a valid latitude and longitude." }),
-            400
+            jsonify({"message": "Please provide a valid latitude and longitude."}),
+            400,
         )
     if lat < -90 or lat > 90:
         return (
-            jsonify({ "message": "Passed latitude out of boundaries. A latitude has to be between -90 and 90 in value." }),
-            400
+            jsonify(
+                {
+                    "message": "Passed latitude out of boundaries. A latitude has to be between -90 and 90 in value."
+                }
+            ),
+            400,
         )
     if lat < -60 or lat > 70:
         return (
-            jsonify({ "message": "No values available outside the latitude range -60 to 70." }),
-            400
+            jsonify(
+                {"message": "No values available outside the latitude range -60 to 70."}
+            ),
+            400,
         )
-    
+
     # Format longitude, latitude and date
     date = np.datetime64(date)
     # Round to 1 decimal place as the coordinates are stored in the dataset with 1 decimal place
     lng = round(longitude_modulo(lng), 1)
     lat = round(lat, 1)
 
-
     print(f"Longitude: {lng}, Latitude: {lat}, Date: {date}")
-    
+
     with xr.open_dataset("data/waves_2019-01-01.nc", engine="netcdf4") as ds:
         """
         table format:
@@ -62,25 +69,25 @@ def get_location_data():
             swh        float64 --> significant wave height
         """
         wave_height = ds.sel(longitude=lng, latitude=lat, time=date, method="nearest")
-    
+
     if np.isnan(wave_height["hmax"].values):
         return (
-            jsonify({ "message": "No data available for the given location and date." }),
+            jsonify({"message": "No data available for the given location and date."}),
             404,
         )
 
-    return jsonify({
-        "location": {
-            "lng": lng,
-            "lat": lat
-        },
-        "hmax": wave_height["hmax"].values.tolist(),
-        "mwd": wave_height["mwd"].values.tolist(),
-        "mwp": wave_height["mwp"].values.tolist(),
-        "tmax": wave_height["tmax"].values.tolist(),
-        "swh": wave_height["swh"].values.tolist()
-    })
+    return jsonify(
+        {
+            "location": {"lng": lng, "lat": lat},
+            "hmax": wave_height["hmax"].values.tolist(),
+            "mwd": wave_height["mwd"].values.tolist(),
+            "mwp": wave_height["mwp"].values.tolist(),
+            "tmax": wave_height["tmax"].values.tolist(),
+            "swh": wave_height["swh"].values.tolist(),
+        }
+    )
+
 
 # Run the app only if the script is run directly and not imported
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)
