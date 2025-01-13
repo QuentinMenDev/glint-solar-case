@@ -68,12 +68,6 @@ def get_location_data():
         """
         wave_height = ds.sel(longitude=lng, latitude=lat, time=date, method="nearest")
 
-        print(wave_height["hmax"])
-        print(wave_height["mwd"])
-        print(wave_height["mwp"])
-        print(wave_height["tmax"])
-        print(wave_height["swh"])
-
     if np.isnan(wave_height["hmax"].values):
         return (
             jsonify({"message": "No data available for the given location and date."}),

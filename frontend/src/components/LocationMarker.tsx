@@ -1,8 +1,11 @@
-import { useState } from "react"
+import { type FC, useState } from "react"
 import { Marker, Popup, useMapEvents } from "react-leaflet"
 import type { ApiResponse } from "../types"
 
-const LocationMarker = () => {
+interface Props {
+	callback: (data: ApiResponse) => void
+}
+const LocationMarker: FC<Props> = ({ callback }) => {
 	const [position, setPosition] = useState({ lat: 51.505, lng: -0.09 })
 	const [locationData, setLocationData] = useState<ApiResponse | null>(null)
 
@@ -28,8 +31,8 @@ const LocationMarker = () => {
 			map.flyTo(e.latlng, map.getZoom())
 
 			const res = await getLocationData(e.latlng.lng, e.latlng.lat)
-			console.log(res)
 			setLocationData(res)
+			callback(res)
 		},
 	})
 
@@ -44,7 +47,7 @@ const LocationMarker = () => {
 						<hr />
 
 						<h3>Data:</h3>
-						{locationData ? (
+						{locationData?.hmax ? (
 							<div>
 								<p>{locationData.date}</p>
 								<p>Max Wave Height: {locationData.hmax} m</p>
