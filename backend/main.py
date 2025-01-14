@@ -47,7 +47,8 @@ def get_location_data():
         )
 
     # Format longitude, latitude and date
-    date = np.datetime64(date)
+    date_from = np.datetime64(date)
+    date_to = date_from + np.timedelta64(1, "D") - np.timedelta64(1, "s")
     # Round to 1 decimal place as the coordinates are stored in the dataset with 1 decimal place
     lng = round(longitude_modulo(lng), 1)
     lat = round(lat, 1)
@@ -66,9 +67,16 @@ def get_location_data():
             tmax       float64 --> peak wave period (s)
             swh        float64 --> significant wave height (m)
         """
-        wave_height = ds.sel(longitude=lng, latitude=lat, time=date, method="nearest")
+        # Select the data for the given location and date
+        location_data = ds.sel(longitude=0, latitude=0, method="nearest")
+        day_data = location_data.sel(time=slice(date_from, date_to)) # Select the data for the given date, can be used later to do range of dates
+        # Find the table index of the maximum hmax value
+        max_hmax_index = day_data["hmax"].argmax().item()
+        max_hmax_time = day_data["time"].isel(time=max_hmax_index)
+        # Get the values of the maximum hmax
+        max_hmax_values = day_data.sel(time=max_hmax_time)
 
-    if np.isnan(wave_height["hmax"].values):
+    if np.isnan(max_hmax_values["hmax"].values):
         return (
             jsonify({"message": "No data available for the given location and date."}),
             404,
@@ -78,11 +86,11 @@ def get_location_data():
         {
             "location": {"lng": lng, "lat": lat},
             "date": date.astype(str),
-            "hmax": wave_height["hmax"].values.tolist(),
-            "mwd": wave_height["mwd"].values.tolist(),
-            "mwp": wave_height["mwp"].values.tolist(),
-            "tmax": wave_height["tmax"].values.tolist(),
-            "swh": wave_height["swh"].values.tolist(),
+            "hmax": max_hmax_values["hmax"].values.tolist(),
+            "mwd": max_hmax_values["mwd"].values.tolist(),
+            "mwp": max_hmax_values["mwp"].values.tolist(),
+            "tmax": max_hmax_values["tmax"].values.tolist(),
+            "swh": max_hmax_values["swh"].values.tolist(),
         }
     )
 
